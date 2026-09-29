@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Kabadiwala Connect</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.css">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #2E7D32;
+  --primary-light: #4CAF50;
+  --primary-dark: #1B5E20;
+  --accent: #FF9800;
+  --bg: #F5F5F5;
+  --card: #FFFFFF;
+  --text: #212121;
+  --text-secondary: #616161;
+  --text-muted: #9E9E9E;
+  --border: #E0E0E0;
+  --error: #D32F2F;
+  --warning: #F57C00;
+  --info: #1976D2;
+  --success: #388E3C;
+  --shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.12);
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.app-container {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+/* Status Bar */
+.status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--primary-dark);
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+}
+.status-bar .offline-badge {
+  background: var(--warning);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 600;
+  display: none;
+}
+.status-bar .offline-badge.show { display: inline-block; }
+/* Header */
+.header {
+  background: var(--primary);
+  color: white;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header h1 {
+  font-size: 18px;
+  font-weight: 700;
+}
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.speaker-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.1);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.speaker-btn:hover, .speaker-btn:active {
+  background: rgba(255,255,255,0.25);
+  border-color: white;
+}
+.speaker-btn.speaking {
+  animation: pulse-speak 1s infinite;
+  background: rgba(255,255,255,0.3);
+}
+@keyframes pulse-speak {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+/* Navigation Chips */
+.nav-chips {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  background: white;
+  border-bottom: 1px solid var(--border);
+  scrollbar-width: none;
+}
+.nav-chips::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  background: white;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+.chip.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.chip:hover:not(.active) {
+  border-color: var(--primary-light);
+  color: var(--primary);
+}
+/* Screens */
+.screen {
+  display: none;
+  padding: 16px;
+  animation: fadeIn 0.3s ease;
+}
+.screen.active { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* Language Screen */
+.language-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 120px);
+  text-align: center;
+  padding: 32px 16px;
+}
+.language-screen .logo {
+  width: 80px;
+  height: 80px;
+  background: var(--primary);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-lg);
+}
+.language-screen .logo svg { width: 48px; height: 48px; }
+.language-screen h2 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: var(--primary-dark);
+}
+.language-screen p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 32px;
+}
+.lang-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 280px;
+}
+.lang-btn {
+  padding: 16px 24px;
+  border-radius: var(--radius);
+  border: 2px solid var(--border);
+  background: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.lang-btn:hover, .lang-btn.selected {
+  border-color: var(--primary);
+  background: #E8F5E9;
+  color: var(--primary-dark);
+}
+.lang-btn .lang-native {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+/* Cards */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+/* Categories Grid */
+.categories-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.category-card {
+  background: white;
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  border: 2px solid var(--border);
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.category-card:hover, .category-card.selected {
+  border-color: var(--primary);
+  box-shadow: var(--shadow);
+}
+.category-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 20px;
+  height: 20px;
+  background: var(--primary);
+  color: white;
+  border-radius: 50%;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.category-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 12px;
+  background: #E8F5E9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.category-icon svg { width: 36px; height: 36px; fill: var(--primary); }
+.category-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.category-rate {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+/* Weight Stepper */
+.weight-section {
+  text-align: center;
+  padding: 24px 0;
+}
+.weight-display {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--primary-dark);
+  margin: 16px 0;
+}
+.weight-display span {
+  font-size: 20px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.weight-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin: 20px 0;
+}
+.weight-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  background: white;
+  color: var(--primary);
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.weight-btn:hover { background: var(--primary); color: white; }
+.weight-btn:active { transform: scale(0.95); }
+.weight-slider {
+  width: 100%;
+  margin: 16px 0;
+  -webkit-appearance: none;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  outline: none;
+}
+.weight-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(46,125,50,0.3);
+}
+/* Price Display */
+.price-display {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  border-radius: var(--radius);
+  padding: 20px;
+  text-align: center;
+  color: white;
+  margin: 16px 0;
+}
+.price-label {
+  font-size: 12px;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+.price-value {
+  font-size: 36px;
+  font-weight: 800;
+}
+.price-range {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 8px;
+}
+/* Buttons */
+.btn {
+  padding: 14px 24px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-secondary {
+  background: white;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+}
+.btn-accent {
+  background: var(--accent);
+  color: white;
+}
+/* Collection List */
+.collection-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.collection-item:last-child { border-bottom: none; }
+.collection-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: #E8F5E9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.collection-thumb svg { width: 24px; height: 24px; fill: var(--primary); }
+.collection-info { flex: 1; }
+.collection-info h4 { font-size: 14px; font-weight: 600; }
+.collection-info p { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.collection-amount {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+/* State Gallery */
+.state-card {
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  border-left: 4px solid;
+}
+.state-card.airplane {
+  background: #FFF3E0;
+  border-color: var(--warning);
+}
+.state-card.empty {
+  background: #F3E5F5;
+  border-color: #7B1FA2;
+}
+.state-card.error {
+  background: #FFEBEE;
+  border-color: var(--error);
+}
+.state-card.stale {
+  background: #E3F2FD;
+  border-color: var(--info);
+}
+.state-card.pending {
+  background: #FFF8E1;
+  border-color: #F9A825;
+}
+.state-card.conflict {
+  background: #FCE4EC;
+  border-color: #C62828;
+}
+.state-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.state-desc {
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+/* Stats Row */
+.stats-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.stat-box {
+  background: white;
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--primary-dark);
+}
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+/* Provenance text */
+.provenance {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+/* Sync indicator */
+.sync-bar {
+  background: #E8F5E9;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--success);
+  font-weight: 500;
+}
+.sync-bar.warning {
+  background: #FFF3E0;
+  color: var(--warning);
+}
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: blink 2s infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+/* Bottom Nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 8px 0;
+  z-index: 100;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: color 0.2s;
+  font-size: 10px;
+  font-weight: 600;
+}
+.nav-item.active { color: var(--primary); }
+.nav-item svg { width: 22px; height: 22px; }
+/* Spacing for bottom nav */
+.screen { padding-bottom: 80px; }
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--text);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 200;
+  transition: transform 0.3s ease;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+/* Section titles */
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+/* Pending dues */
+.dues-banner {
+  background: linear-gradient(135deg, #FFF8E1, #FFECB3);
+  border: 1px solid #FFD54F;
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dues-banner .dues-icon {
+  width: 36px;
+  height: 36px;
+  background: #F9A825;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.dues-info h4 { font-size: 13px; font-weight: 700; color: #F57F17; }
+.dues-info p { font-size: 12px; color: #F57F17; opacity: 0.8; }
+/* Responsive */
+@media (max-width: 420px) {
+  .app-container { max-width: 100%; }
+  .bottom-nav { max-width: 100%; }
+}
+/* Photo placeholder */
+.photo-placeholder {
+  width: 100%;
+  height: 120px;
+  background: #E0E0E0;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  position: relative;
+  overflow: hidden;
+}
+.photo-placeholder::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0,0,0,0.03) 10px,
+    rgba(0,0,0,0.03) 20px
+  );
+}
+.photo-placeholder svg {
+  width: 40px;
+  height: 40px;
+  fill: var(--text-muted);
+  opacity: 0.5;
+  z-index: 1;
+}
+.photo-label {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  font-size: 10px;
+  color: var(--text-muted);
+  background: rgba(255,255,255,0.8);
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 2;
+}
+/* Conflict state */
+.conflict-detail {
+  background: white;
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+.conflict-detail code {
+  background: #F5F5F5;
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-size: 10px;
+}
+</style>
+</head>
+<body>
+<div class="app-container" id="app">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span id="statusTime">9:41 AM</span>
+    <span>Kabadiwala Connect</span>
+    <span class="offline-badge" id="offlineBadge">⚡ Offline</span>
+  </div>
+
+  <!-- Language Screen -->
+  <div class="screen active" id="screen-language">
+    <div class="language-screen">
+      <div class="logo">
+        <svg viewBox="0 0 48 48" fill="white">
+          <path d="M24 4C12.95 4 4 12.95 4 24s8.95 20 20 20 20-8.95 20-20S35.05 4 24 4zm-2 30l-10-10 2.83-2.83L22 28.34l13.17-13.17L38 18 22 34z"/>
+          <path d="M16 16h4v4h-4zm8 0h4v4h-4zm-8 8h4v4h-4zm8 0h4v4h-4z" opacity="0.5"/>
+        </svg>
+      </div>
+      <h2 data-i18n="app_name">Kabadiwala Connect</h2>
+      <p data-i18n="choose_lang">Choose your language / भाषा चुनें</p>
+      <div class="lang-options">
+        <button class="lang-btn" onclick="selectLanguage('en')">
+          🇬🇧 English <span class="lang-native">English</span>
+        </button>
+        <button class="lang-btn" onclick="selectLanguage('hi')">
+          🇮🇳 हिंदी <span class="lang-native">Hindi</span>
+        </button>
+        <button class="lang-btn" onclick="selectLanguage('mr')">
+          🏛️ मराठी <span class="lang-native">Marathi</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App (hidden until language selected) -->
+  <div id="mainApp" style="display:none;">
+    <!-- Header -->
+    <div class="header">
+      <h1 data-i18n="app_name">Kabadiwala Connect</h1>
+      <div class="header-actions">
+        <button class="speaker-btn" id="mainSpeaker" onclick="speakCurrentScreen()" title="Read aloud">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sync Bar -->
+    <div class="sync-bar" id="syncBar">
+      <span class="sync-dot"></span>
+      <span data-i18n="synced">Synced • Last: 2 min ago</span>
+    </div>
+
+    <!-- Nav Chips -->
+    <div class="nav-chips">
+      <span class="chip active" data-screen="home" onclick="showScreen('home')" data-i18n="nav_home">Home</span>
+      <span class="chip" data-screen="collect" onclick="showScreen('collect')" data-i18n="nav_collect">Collect</span>
+      <span class="chip" data-screen="weigh" onclick="showScreen('weigh')" data-i18n="nav_weigh">Weigh</span>
+      <span class="chip" data-screen="history" onclick="showScreen('history')" data-i18n="nav_history">History</span>
+      <span class="chip" data-screen="states" onclick="showScreen('states')" data-i18n="nav_states">States</span>
+    </div>
+
+    <!-- Home Screen -->
+    <div class="screen" id="screen-home">
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-value" id="statCollections">12</div>
+          <div class="stat-label" data-i18n="stat_collections">Collections</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="statWeight">48.5</div>
+          <div class="stat-label" data-i18n="stat_kg">Kg Today</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="statEarnings">₹9,240</div>
+          <div class="stat-label" data-i18n="stat_earnings">Earnings</div>
+        </div>
+      </div>
+
+      <div class="dues-banner" id="duesBanner">
+        <div class="dues-icon">₹</div>
+        <div class="dues-info">
+          <h4 data-i18n="pending_dues">Pending Dues: ₹2,450</h4>
+          <p data-i18n="pending_desc">From 3 collections awaiting payment</p>
+        </div>
+      </div>
+
+      <h3 class="section-title" data-i18n="recent_activity">Recent Activity</h3>
+      <div class="card">
+        <div class="collection-item">
+          <div class="collection-thumb">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg>
+          </div>
+          <div class="collection-info">
+            <h4 data-i18n="cat_circuits">Circuit Boards</h4>
+            <p>3.2 kg • 10:30 AM</p>
+          </div>
+          <div class="collection-amount">₹720</div>
+        </div>
+        <div class="collection-item">
+          <div class="collection-thumb">
+            <svg viewBox="0 0 24 24"><path d="M17 16l-4-4V8.82C14.16 8.4 15 7.3 15 6c0-1.66-1.34-3-3-3S9 4.34 9 6c0 1.3.84 2.4 2 2.82V12l-4 4H3v5h5v-3.05l4-4.2 4 4.2V21h5v-5h-4z"/></svg>
+          </div>
+          <div class="collection-info">
+            <h4 data-i18n="cat_cables">Cables & Wires</h4>
+            <p>5.8 kg • 9:15 AM</p>
+          </div>
+          <div class="collection-amount">₹1,160</div>
+        </div>
+        <div class="collection-item">
+          <div class="collection-thumb">
+            <svg viewBox="0 0 24 24"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 2.52 2.95 3.44 5.5 3.44 1.01 0 1.91-.11 2.5-.32 1.08-.37 2.07-1.05 2.5-1.63.43.58 1.42 1.26 2.5 1.63.59.21 1.49.32 2.5.32 2.55 0 5.5-.92 5.5-3.44V5zm-17 .95c1.08-.33 2.32-.45 3.5-.45s2.42.12 3.5.45v13.1H7.5V5.95zm7 0c1.08-.33 2.32-.45 3.5-.45s2.42.12 3.5.45v13.1h-7V5.95z"/></svg>
+          </div>
+          <div class="collection-info">
+            <h4 data-i18n="cat_phones">Old Phones</h4>
+            <p>1.5 kg • Yesterday</p>
+          </div>
+          <div class="collection-amount">₹375</div>
+        </div>
+      </div>
+
+      <p class="provenance" data-i18n="provenance_note">Data stored locally. Syncs when online. Rates from PMC scrap yard, updated daily.</p>
+    </div>
+
+    <!-- Collect Screen -->
+    <div class="screen" id="screen-collect">
+      <h3 class="section-title" data-i18n="select_category">Select Category</h3>
+      
+      <div class="photo-placeholder">
+        <svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>
+        <span class="photo-label" data-i18n="photo_hint">📸 Shoot in Pune scrap yard</span>
+      </div>
+
+      <div class="categories-grid">
+        <div class="category-card" onclick="selectCategory(this, 'circuits')">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg>
+          </div>
+          <div class="category-name" data-i18n="cat_circuits">Circuit Boards</div>
+          <div class="category-rate">₹225-250/kg</div>
+        </div>
+        <div class="category-card" onclick="selectCategory(this, 'cables')">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 16l-4-4V8.82C14.16 8.4 15 7.3 15 6c0-1.66-1.34-3-3-3S9 4.34 9 6c0 1.3.84 2.4 2 2.82V12l-4 4H3v5h5v-3.05l4-4.2 4 4.2V21h5v-5h-4z"/></svg>
+          </div>
+          <div class="category-name" data-i18n="cat_cables">Cables & Wires</div>
+          <div class="category-rate">₹180-200/kg</div>
+        </div>
+        <div class="category-card" onclick="selectCategory(this, 'phones')">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+          </div>
+          <div class="category-name" data-i18n="cat_phones">Old Phones</div>
+          <div class="category-rate">₹200-230/kg</div>
+        </div>
+        <div class="category-card" onclick="selectCategory(this, 'batteries')">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4zM13 18h-2v-2h2v2zm0-4h-2V9h2v5z"/></svg>
+          </div>
+          <div class="category-name" data-i18n="cat_batteries">Batteries</div>
+          <div class="category-rate">₹190-220/kg</div>
+        </div>
+        <div class="category-card" onclick="selectCategory(this, 'monitors')">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7l-2 3v1h8v-1l-2-3h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/></svg>
+          </div>
+          <div class="category-name" data-i18n="cat_monitors">Monitors</div>
+          <div class="category-rate">₹180-210/kg</div>
+        </div>
+        <div class="category-card" onclick="selectCategory(this, 'plastics')">
+          <div class="category-icon">
+            <svg viewBox="0 0 24 24"><path d="M5 5h2v2H5zm0 4h2v2H5zm0 4h2v2H5zm0 4h2v2H5zm12-12h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2zm0 4h2v2h-2zM9 5h6v2H9zm0 4h6v2H9zm0 4h6v2H9zm0 4h6v2H9z"/></svg>
+          </div>
+          <div class="category-name" data-i18n="cat_plastics">E-Plastics</div>
+          <div class="category-rate">₹180-195/kg</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weigh Screen -->
+    <div class="screen" id="screen-weigh">
+      <h3 class="section-title" data-i18n="weigh_material">Weigh Material</h3>
+      
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title" id="weighCategoryName" data-i18n="selected_cat">Selected: Circuit Boards</span>
+          <span class="provenance" id="weighGrade">Grade A</span>
+        </div>
+        
+        <div class="weight-section">
+          <div class="weight-display">
+            <span id="weightValue">0.0</span> <span>kg</span>
+          </div>
+          <div class="weight-controls">
+            <button class="weight-btn" onclick="adjustWeight(-0.5)">−</button>
+            <input type="range" class="weight-slider" id="weightSlider" min="0" max="50" step="0.1" value="0" oninput="setWeight(this.value)">
+            <button class="weight-btn" onclick="adjustWeight(0.5)">+</button>
+          </div>
+          <p class="provenance" data-i18n="weight_hint">Tap +/− or slide to adjust weight</p>
+        </div>
+
+        <div class="price-display">
+          <div class="price-label" data-i18n="estimated_value">Estimated Value</div>
+          <div class="price-value" id="priceValue">₹0</div>
+          <div class="price-range" id="priceRange" data-i18n="price_range">Range: ₹180–250 per kg for this grade</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button class="btn btn-secondary" onclick="resetWeight()" data-i18n="btn_reset">Reset</button>
+        <button class="btn btn-primary" onclick="confirmCollection()" data-i18n="btn_confirm">Confirm Collection</button>
+      </div>
+    </div>
+
+    <!-- History Screen -->
+    <div class="screen" id="screen-history">
+      <h3 class="section-title" data-i18n="collection_history">Collection History</h3>
+      
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-value">47</div>
+          <div class="stat-label" data-i18n="stat_total">Total</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">186kg</div>
+          <div class="stat-label" data-i18n="stat_total_kg">Total Kg</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value">₹38.2K</div>
+          <div class="stat-label" data-i18n="stat_total_val">Total Value</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="collection-item">
+          <div class="collection-thumb">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM8 20H4v-4h4v4zm0-6H4v-4h4v4zm0-6H4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4zm6 12h-4v-4h4v4zm0-6h-4v-4h4v4zm0-6h-4V4h4v4z"/></svg>
+          </div>
+          <div class="collection-info">
+            <h4 data-i18n="cat_circuits">Circuit Boards</h4>
+            <p>3.2 kg • Today 10:30 AM</p>
+          </div>
+          <div class="collection-amount">₹720</div>
+        </div>
+        <div class="collection-item">
+          <div class="collection-thumb">
+            <svg viewBox="0 0 24 24"><path d="M17 16l-4-4V8.82C14.16 8.4 15 7.3 15 6c0-1.66-1.34-3-3-3S9 4.34 9 6c0 1.3.84 2.4 2 2.82V12l-4 4H3v5h5v-3.05l4-4.2 4 4.2V21h5v-5h-4z"/></svg>
+          </div>
+          <div class="collection-info">
+            <h4 data-i18n="cat_cables">Cables & Wires</h4>
+            <p>5.8 kg • Today 9:15 AM</p>
+          </div>
+          <div class="collection-amount">₹1,160</div>
+        </div>
+        <div class="collection-item">
+          <div class="collection-thumb">
+            <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/></svg>
+          </div>
+          <div class="collection-info">
+            <h4 data-i18n="cat_phones">Old Phones</h4>
+            <p>1.5 kg • Yesterday</p>
+          </div>
+          <div class="collection-amount">₹375</div>
+        </div>
+        <div class="collection-item">
+          <div class="collection-thumb">
+            <svg viewBox="0 0 24 24"><path d="M15.67 4H14V2h-4v2H8.33C7.6 4 7 4.6 7 5.33v15.33C7 21.4 7.6 22 8.33 22h7.33c.74 0 1.34-.6 1.34-1.33V5.33C17 4.6 16.4 4 15.67 4z"/></svg>
+          </div>
+          <div class="collection-info">
+            <h4 data-i18n="cat_batteries">Batteries</h4>
+            <p>4.1 kg • 2 days ago</p>
+          </div>
+          <div class="collection-amount">₹820</div>
+        </div>
+        <div class="collection-item">
+          <div class="collection-thumb">
+            <svg viewBox="0 0 24 24"><path d="M21 2H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h7l-2 3v1h8v-1l-2-3h7c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H3V4h18v12z"/></svg>
+          </div>
+          <div class="collection-info">
+            <h4 data-i18n="cat_monitors">Monitors</h4>
+            <p>8.3 kg • 3 days ago</p>
+          </div>
+          <div class="collection-amount">₹1,743</div>
+        </div>
+      </div>
+
+      <p class="provenance" data-i18n="history_note">All records stored offline. Will sync when connected.</p>
+    </div>
+
+    <!-- States Screen -->
+    <div class="screen" id="screen-states">
+      <h3 class="section-title" data-i18n="state_gallery">State Gallery</h3>
+      <p class="provenance" style="margin-bottom:16px;" data-i18n="state_desc">All possible app states for edge cases and errors.</p>
+
+      <div class="state-card airplane">
+        <div class="state-title">✈️ <span data-i18n="state_airplane">Airplane Mode</span></div>
+        <div class="state-desc" data-i18n="state_airplane_desc">App continues working. Data queued for sync. Collections saved locally with timestamp.</div>
+      </div>
+
+      <div class="state-card empty">
+        <div class="state-title">📭 <span data-i18n="state_empty">Empty State</span></div>
+        <div class="state-desc" data-i18n="state_empty_desc">No collections yet. Shows friendly prompt to start first collection with guided onboarding.</div>
+      </div>
+
+      <div class="state-card error">
+        <div class="state-title">⚠️ <span data-i18n="state_error">Error State</span></div>
+        <div class="state-desc" data-i18n="state_error_desc">Scale disconnected or invalid reading. Shows retry option and manual entry fallback.</div>
+      </div>
+
+      <div class="state-card stale">
+        <div class="state-title">🕐 <span data-i18n="state_stale">Stale Data</span></div>
+        <div class="state-desc" data-i18n="state_stale_desc">Prices haven't updated in 24h. Shows warning banner with "Refresh rates" action button.</div>
+      </div>
+
+      <div class="state-card pending">
+        <div class="state-title">💰 <span data-i18n="state_pending">Pending Dues</span></div>
+        <div class="state-desc" data-i18n="state_pending_desc">Payment not yet received from buyer. Shows amount owed, days pending, and buyer contact.</div>
+      </div>
+
+      <div class="state-card conflict">
+        <div class="state-title">🔀 <span data-i18n="state_conflict">Sync Conflict</span></div>
+        <div class="state-desc" data-i18n="state_conflict_desc">Local and server data differ. Shows both versions with option to keep local, server, or merge.</div>
+        <div class="conflict-detail">
+          <strong>Local:</strong> <code>weight: 3.2kg, ₹720</code><br>
+          <strong>Server:</strong> <code>weight: 3.0kg, ₹675</code><br>
+          <em>Resolve: Keep local → overrides server record</em>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav" id="bottomNav" style="display:none;">
+    <div class="nav-item active" data-screen="home" onclick="showScreen('home')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <span data-i18n="nav_home">Home</span>
+    </div>
+    <div class="nav-item" data-screen="collect" onclick="showScreen('collect')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+      <span data-i18n="nav_collect">Collect</span>
+    </div>
+    <div class="nav-item" data-screen="weigh" onclick="showScreen('weigh')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-1.27 0-2.4.8-2.82 2H3v2h1.95L2 20c-.42 2.04 1.6 3.98 3.64 3.98h12.72c2.04 0 4.06-1.94 3.64-3.98L19.05 7H21V5h-6.18C14.4 3.8 13.27 3 12 3zM12 5c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM7.02 19l1.64-10h6.68l1.64 10H7.02z"/></svg>
+      <span data-i18n="nav_weigh">Weigh</span>
+    </div>
+    <div class="nav-item" data-screen="history" onclick="showScreen('history')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+      <span data-i18n="nav_history">History</span>
+    </div>
+    <div class="nav-item" data-screen="states" onclick="showScreen('states')">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+      <span data-i18n="nav_states">States</span>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+// ============ STATE ============
+let state = {
+  language: null,
+  currentScreen: 'home',
+  selectedCategory: null,
+  weight: 0,
+  isOffline: false,
+  collections: [
+    { id: 1, category: 'circuits', weight: 3.2, amount: 720, time: 'Today 10:30 AM' },
+    { id: 2, category: 'cables', weight: 5.8, amount: 1160, time: 'Today 9:15 AM' },
+    { id: 3, category: 'phones', weight: 1.5, amount: 375, time: 'Yesterday' },
+  ]
+};
+
+// ============ i18n ============
+const translations = {
+  en: {
+    app_name: 'Kabadiwala Connect',
+    choose_lang: 'Choose your language / भाषा चुनें',
+    nav_home: 'Home',
+    nav_collect: 'Collect',
+    nav_weigh: 'Weigh',
+    nav_history: 'History',
+    nav_states: 'States',
+    synced: 'Synced • Last: 2 min ago',
+    stat_collections: 'Collections',
+    stat_kg: 'Kg Today',
+    stat_earnings: 'Earnings',
+    stat_total: 'Total',
+    stat_total_kg: 'Total Kg',
+    stat_total_val: 'Total Value',
+    pending_dues: 'Pending Dues: ₹2,450',
+    pending_desc: 'From 3 collections awaiting payment',
+    recent_activity: 'Recent Activity',
+    select_category: 'Select Category',
+    weigh_material: 'Weigh Material',
+    selected_cat: 'Selected: Circuit Boards',
+    weight_hint: 'Tap +/− or slide to adjust weight',
+    estimated_value: 'Estimated Value',
+    price_range: 'Range: ₹180–250 per kg for this grade',
+    btn_reset: 'Reset',
+    btn_confirm: 'Confirm Collection',
+    collection_history: 'Collection History',
+    provenance_note: 'Data stored locally. Syncs when online. Rates from PMC scrap yard, updated daily.',
+    history_note: 'All records stored offline. Will sync when connected.',
+    state_gallery: 'State Gallery',
+    state_desc: 'All possible app states for edge cases and errors.',
+    state_airplane: 'Airplane Mode',
+    state_airplane_desc: 'App continues working. Data queued for sync. Collections saved locally with timestamp.',
+    state_empty: 'Empty State',
+    state_empty_desc: 'No collections yet. Shows friendly prompt to start first collection with guided onboarding.',
+    state_error: 'Error State',
+    state_error_desc: 'Scale disconnected or invalid reading. Shows retry option and manual entry fallback.',
+    state_stale: 'Stale Data',
+    state_stale_desc: 'Prices haven\'t updated in 24h. Shows warning banner with "Refresh rates" action button.',
+    state_pending: 'Pending Dues',
+    state_pending_desc: 'Payment not yet received from buyer. Shows amount owed, days pending, and buyer contact.',
+    state_conflict: 'Sync Conflict',
+    state_conflict_desc: 'Local and server data differ. Shows both versions with option to keep local, server, or merge.',
+    cat_circuits: 'Circuit Boards',
+    cat_cables: 'Cables & Wires',
+    cat_phones: 'Old Phones',
+    cat_batteries: 'Batteries',
+    cat_monitors: 'Monitors',
+    cat_plastics: 'E-Plastics',
+    photo_hint: '📸 Shoot in Pune scrap yard',
+    toast_confirmed: '✓ Collection saved offline',
+    toast_reset: 'Weight reset',
+    toast_lang: 'Language set',
+    speak_home: 'Home screen. 12 collections today, 48.5 kilograms. Earnings: 9,240 rupees. Pending dues: 2,450 rupees from 3 collections.',
+    speak_collect: 'Select category. Circuit boards, cables and wires, old phones, batteries, monitors, e-plastics.',
+    speak_weigh: 'Weigh material. Use the slider or plus minus buttons to set weight. Price updates automatically.',
+    speak_history: 'Collection history. 47 total collections, 186 kilograms, total value 38,200 rupees.',
+    speak_states: 'State gallery. Showing all possible app states: airplane mode, empty, error, stale data, pending dues, and sync conflict.',
+  },
+  hi: {
+    app_name: 'कबाड़ीवाला कनेक्ट',
+    choose_lang: 'अपनी भाषा चुनें / Choose your language',
+    nav_home: 'होम',
+    nav_collect: 'इकट्ठा',
+    nav_weigh: 'तौल',
+    nav_history: 'इतिहास',
+    nav_states: 'स्थिति',
+    synced: 'सिंक हो गया • अंतिम: 2 मिनट पहले',
+    stat_collections: 'संग्रह',
+    stat_kg: 'किलो आज',
+    stat_earnings: 'कमाई',
+    stat_total: 'कुल',
+    stat_total_kg: 'कुल किलो',
+    stat_total_val: 'कुल मूल्य',
+    pending_dues: 'बकाया: ₹2,450',
+    pending_desc: '3 संग्रह से भुगतान बाकी',
+    recent_activity: 'हाल की गतिविधि',
+    select_category: 'श्रेणी चुनें',
+    weigh_material: 'सामग्री तौलें',
+    selected_cat: 'चयनित: सर्किट बोर्ड',
+    weight_hint: '+/− दबाएं या स्लाइड करें',
+    estimated_value: 'अनुमानित मूल्य',
+    price_range: 'सीमा: इस ग्रेड के लिए ₹180–250 प्रति किलो',
+    btn_reset: 'रीसेट',
+    btn_confirm: 'संग्रह पुष्टि करें',
+    collection_history: 'संग्रह इतिहास',
+    provenance_note: 'डेटा स्थानीय रूप से संग्रहीत। ऑनलाइन होने पर सिंक होगा।',
+    history_note: 'सभी रिकॉर्ड ऑफ़लाइन संग्रहीत। कनेक्ट होने पर सिंक होगा।',
+    state_gallery: 'स्थिति गैलरी',
+    state_desc: 'सभी संभव ऐप स्थितियां।',
+    state_airplane: 'एयरप्लेन मोड',
+    state_airplane_desc: 'ऐप काम करता रहेगा। डेटा सिंक के लिए कतार में।',
+    state_empty: 'खाली स्थिति',
+    state_empty_desc: 'अभी कोई संग्रह नहीं। पहला संग्रह शुरू करने का संकेत।',
+    state_error: 'त्रुटि स्थिति',
+    state_error_desc: 'स्केल डिस्कनेक्ट या अमान्य रीडिंग। पुनः प्रयास विकल्प दिखाता है।',
+    state_stale: 'पुराना डेटा',
+    state_stale_desc: 'कीमतें 24 घंटे से अपडेट नहीं। चेतावनी बैनर दिखाता है।',
+    state_pending: 'बकाया भुगतान',
+    state_pending_desc: 'खरीदार से भुगतान नहीं मिला। राशि और संपर्क दिखाता है।',
+    state_conflict: 'सिंक विरोध',
+    state_conflict_desc: 'स्थानीय और सर्वर डेटा अलग। दोनों संस्करण दिखाता है।',
+    cat_circuits: 'सर्किट बोर्ड',
+    cat_cables: 'केबल और तार',
+    cat_phones: 'पुराने फोन',
+    cat_batteries: 'बैटरी',
+    cat_monitors: 'मॉनिटर',
+    cat_plastics: 'ई-प्लास्टिक',
+    photo_hint: '📸 पुणे स्क्रैप यार्ड में फोटो लें',
+    toast_confirmed: '✓ संग्रह ऑफ़लाइन सहेजा गया',
+    toast_reset: 'वजन रीसेट',
+    toast_lang: 'भाषा सेट',
+    speak_home: 'होम स्क्रीन। आज 12 संग्रह, 48.5 किलोग्राम। कमाई: 9,240 रुपये। बकाया: 2,450 रुपये।',
+    speak_collect: 'श्रेणी चुनें। सर्किट बोर्ड, केबल, पुराने फोन, बैटरी, मॉनिटर, ई-प्लास्टिक।',
+    speak_weigh: 'सामग्री तौलें। स्लाइडर या प्लस माइनस बटन से वजन सेट करें।',
+    speak_history: 'संग्रह इतिहास। 47 कुल संग्रह, 186 किलोग्राम, कुल मूल्य 38,200 रुपये।',
+    speak_states: 'स्थिति गैलरी। सभी संभव ऐप स्थितियां दिखा रहा है।',
+  },
+  mr: {
+    app_name: 'कबाडीवाला कनेक्ट',
+    choose_lang: 'तुमची भाषा निवडा / Choose your language',
+    nav_home: 'होम',
+    nav_collect: 'संग्रह',
+    nav_weigh: 'वजन',
+    nav_history: 'इतिहास',
+    nav_states: 'स्थिती',
+    synced: 'सिंक झाले • शेवटचे: 2 मिनिटांपूर्वी',
+    stat_collections: 'संग्रह',
+    stat_kg: 'किलो आज',
+    stat_earnings: 'कमाई',
+    stat_total: 'एकूण',
+    stat_total_kg: 'एकूण किलो',
+    stat_total_val: 'एकूण मूल्य',
+    pending_dues: 'थकबाकी: ₹2,450',
+    pending_desc: '3 संग्रहांकडून पेमेंट बाकी',
+    recent_activity: 'अलीकडील उपक्रम',
+    select_category: 'वर्ग निवडा',
+    weigh_material: 'वस्तू वजन करा',
+    selected_cat: 'निवडलेले: सर्किट बोर्ड',
+    weight_hint: '+/− दाबा किंवा स्लाइड करा',
+    estimated_value: 'अंदाजित मूल्य',
+    price_range: 'श्रेणी: या ग्रेडसाठी ₹180–250 प्रति किलो',
+    btn_reset: 'रीसेट',
+    btn_confirm: 'संग्रह पुष्टी करा',
+    collection_history: 'संग्रह इतिहास',
+    provenance_note: 'डेटा स्थानिकरित्या संग्रहित। ऑनलाइन असताना सिंक होईल.',
+    history_note: 'सर्व रेकॉर्ड ऑफलाइन संग्रहित. कनेक्ट झाल्यावर सिंक होईल.',
+    state_gallery: 'स्थिती गॅलरी',
+    state_desc: 'सर्व संभव अॅप स्थिती.',
+    state_airplane: 'एअरप्लेन मोड',
+    state_airplane_desc: 'अॅप कार्यरत राहील. डेटा सिंकसाठी रांगेत.',
+    state_empty: 'रिकामी स्थिती',
+    state_empty_desc: 'अजून संग्रह नाही. पहिला संग्रह सुरू करण्याचा संकेत.',
+    state_error: 'त्रुटी स्थिती',
+    state_error_desc: 'स्केल डिस्कनेक्ट किंवा अवैध रीडिंग. पुन्हा प्रयत्न विकल्प दाखवतो.',
+    state_stale: 'जुना डेटा',
+    state_stale_desc: 'किंमती 24 तासांपासून अपडेट नाहीत. चेतावणी बॅनर दाखवतो.',
+    state_pending: 'थकबाकी पेमेंट',
+    state_pending_desc: 'खरेदीदाराकडून पेमेंट आलेले नाही. रक्कम आणि संपर्क दाखवतो.',
+    state_conflict: 'सिंक विरोध',
+    state_conflict_desc: 'स्थानिक आणि सर्व्हर डेटा वेगळा. दोन्ही आवृत्त्या दाखवतो.',
+    cat_circuits: 'सर्किट बोर्ड',
+    cat_cables: 'केबल्स आणि वायर्स',
+    cat_phones: 'जुने फोन',
+    cat_batteries: 'बॅटरी',
+    cat_monitors: 'मॉनिटर्स',
+    cat_plastics: 'ई-प्लास्टिक्स',
+    photo_hint: '📸 पुणे स्क्रॅप यार्डमध्ये फोटो काढा',
+    toast_confirmed: '✓ संग्रह ऑफलाइन सेव्ह झाला',
+    toast_reset: 'वजन रीसेट',
+    toast_lang: 'भाषा सेट',
+    speak_home: 'होम स्क्रीन. आज 12 संग्रह, 48.5 किलोग्रॅम. कमई: 9,240 रुपये. थकबाकी: 2,450 रुपये.',
+    speak_collect: 'वर्ग निवडा. सर्किट बोर्ड, केबल्स, जुने फोन, बॅटरी, मॉनिटर्स, ई-प्लास्टिक्स.',
+    speak_weigh: 'वस्तू वजन करा. स्लायडर किंवा प्लस मायनस बटणाने वजन सेट करा.',
+    speak_history: 'संग्रह इतिहास. 47 एकूण संग्रह, 186 किलोग्रॅम, एकूण मूल्य 38,200 रुपये.',
+    speak_states: 'स्थिती गॅलरी. सर्व संभव अॅप स्थिती दाखवत आहे.',
+  }
+};
+
+// ============ CATEGORY RATES ============
+const categoryRates = {
+  circuits: { min: 225, max: 250 },
+  cables: { min: 180, max: 200 },
+  phones: { min: 200, max: 230 },
+  batteries: { min: 190, max: 220 },
+  monitors: { min: 180, max: 210 },
+  plastics: { min: 180, max: 195 }
+};
+
+// ============ FUNCTIONS ============
+
+function selectLanguage(lang) {
+  state.language = lang;
+  document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('selected'));
+  event.target.closest('.lang-btn').classList.add('selected');
+  
+  // Apply translations
+  applyTranslations(lang);
+  
+  // Show main app
+  setTimeout(() => {
+    document.getElementById('screen-language').classList.remove('active');
+    document.getElementById('mainApp').style.display = 'block';
+    document.getElementById('bottomNav').style.display = 'flex';
+    showScreen('home');
+    showToast(translations[lang].toast_lang);
+  }, 400);
+}
+
+function applyTranslations(lang) {
+  const t = translations[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) {
+      el.textContent = t[key];
+    }
+  });
+}
+
+function showScreen(screenName) {
+  state.currentScreen = screenName;
+  
+  // Update screens
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('screen-' + screenName);
+  if (target) target.classList.add('active');
+  
+  // Update chips
+  document.querySelectorAll('.chip').forEach(c => {
+    c.classList.toggle('active', c.dataset.screen === screenName);
+  });
+  
+  // Update bottom nav
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.classList.toggle('active', n.dataset.screen === screenName);
+  });
+}
+
+function selectCategory(el, category) {
+  state.selectedCategory = category;
+  document.querySelectorAll('.category-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  
+  const t = translations[state.language];
+  const catName = t['cat_' + category];
+  document.getElementById('weighCategoryName').textContent = (state.language === 'en' ? 'Selected: ' : state.language === 'hi' ? 'चयनित: ' : 'निवडलेले: ') + catName;
+  
+  updatePrice();
+  
+  // Navigate to weigh screen
+  setTimeout(() => showScreen('weigh'), 300);
+}
+
+function setWeight(val) {
+  state.weight = parseFloat(val);
+  document.getElementById('weightValue').textContent = state.weight.toFixed(1);
+  document.getElementById('weightSlider').value = val;
+  updatePrice();
+}
+
+function adjustWeight(delta) {
+  state.weight = Math.max(0, Math.min(50, state.weight + delta));
+  document.getElementById('weightValue').textContent = state.weight.toFixed(1);
+  document.getElementById('weightSlider').value = state.weight;
+  updatePrice();
+}
+
+function resetWeight() {
+  state.weight = 0;
+  document.getElementById('weightValue').textContent = '0.0';
+  document.getElementById('weightSlider').value = 0;
+  updatePrice();
+  showToast(translations[state.language].toast_reset);
+}
+
+function updatePrice() {
+  const cat = state.selectedCategory || 'circuits';
+  const rates = categoryRates[cat];
+  const avgRate = (rates.min + rates.max) / 2;
+  const value = Math.round(state.weight * avgRate);
+  
+  document.getElementById('priceValue').textContent = '₹' + value.toLocaleString('en-IN');
+  
+  const t = translations[state.language];
+  const rangeText = state.language === 'en' 
+    ? `Range: ₹${rates.min}–${rates.max} per kg for this grade`
+    : state.language === 'hi'
+    ? `सीमा: इस ग्रेड के लिए ₹${rates.min}–${rates.max} प्रति किलो`
+    : `श्रेणी: या ग्रेडसाठी ₹${rates.min}–${rates.max} प्रति किलो`;
+  document.getElementById('priceRange').textContent = rangeText;
+}
+
+function confirmCollection() {
+  if (state.weight <= 0) return;
+  
+  const cat = state.selectedCategory || 'circuits';
+  const rates = categoryRates[cat];
+  const avgRate = (rates.min + rates.max) / 2;
+  const value = Math.round(state.weight * avgRate);
+  
+  state.collections.unshift({
+    id: Date.now(),
+    category: cat,
+    weight: state.weight,
+    amount: value,
+    time: 'Just now'
+  });
+  
+  // Update stats
+  const totalCollections = 12 + state.collections.length - 3;
+  const totalWeight = 48.5 + state.weight;
+  const totalEarnings = 9240 + value;
+  
+  document.getElementById('statCollections').textContent = totalCollections;
+  document.getElementById('statWeight').textContent = totalWeight.toFixed(1);
+  document.getElementById('statEarnings').textContent = '₹' + totalEarnings.toLocaleString('en-IN');
+  
+  showToast(translations[state.language].toast_confirmed);
+  resetWeight();
+}
+
+function speakCurrentScreen() {
+  const btn = document.getElementById('mainSpeaker');
+  const screenKey = 'speak_' + state.currentScreen;
+  const text = translations[state.language][screenKey];
+  
+  if (!text) return;
+  
+  btn.classList.add('speaking');
+  
+  const utterance = new SpeechSynthesisUtterance(text);
+  
+  // Set language
+  const langMap = { en: 'en-IN', hi: 'hi-IN', mr: 'mr-IN' };
+  utterance.lang = langMap[state.language] || 'en-IN';
+  utterance.rate = 0.9;
+  utterance.pitch = 1;
+  
+  utterance.onend = () => btn.classList.remove('speaking');
+  utterance.onerror = () => btn.classList.remove('speaking');
+  
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utterance);
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+// ============ INIT ============
+function updateTime() {
+  const now = new Date();
+  const h = now.getHours();
+  const m = now.getMinutes().toString().padStart(2, '0');
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 || 12;
+  document.getElementById('statusTime').textContent = h12 + ':' + m + ' ' + ampm;
+}
+
+updateTime();
+setInterval(updateTime, 60000);
+
+// Simulate offline toggle for demo
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'o' || e.key === 'O') {
+    state.isOffline = !state.isOffline;
+    document.getElementById('offlineBadge').classList.toggle('show', state.isOffline);
+    const syncBar = document.getElementById('syncBar');
+    if (state.isOffline) {
+      syncBar.classList.add('warning');
+      syncBar.querySelector('[data-i18n]').textContent = state.language === 'en' ? 'Offline mode • Changes saved locally' : state.language === 'hi' ? 'ऑफ़लाइन मोड • बदलाव स्थानीय सहेजे गए' : 'ऑफलाइन मोड • बदल स्थानिकरित्या सेव्ह';
+    } else {
+      syncBar.classList.remove('warning');
+      syncBar.querySelector('[data-i18n]').textContent = translations[state.language]?.synced || 'Synced • Last: 2 min ago';
+    }
+  }
+});
+</script>
+</body>
+</html>
